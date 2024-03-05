@@ -8,12 +8,7 @@ set -e
 BUILD_DIR=$1
 CACHE_DIR=$2
 
-# <BUILD_DIR> is (during this stage) a temporary directory. 
-# During execution of your slug it'll be known as '/app'.
-
-
 . $(dirname $0)/common
-
 
 BIN_DIR=$(cd $(dirname $0); pwd) # absolute path
 
@@ -25,15 +20,14 @@ function indent() {
   esac
 }
 
-
-#create the cache dir if it doesn't exist
+# Create the cache dir if it doesn't exist
 mkdir -p $VENDORING_DIR
 
-# change to vendoring dir to install apache ant
+# Change to vendoring dir to install apache ant
 cd $VENDORING_DIR
 
 if [ -x $ANT_HOME/bin/ant ] ; then
-    #assuming Apache Ant is already installed...
+    # Assuming Apache Ant is already installed...
 	echo "-----> Using Apache Ant $ANT_VER....."
 else
 	echo "-----> Installing Apache Ant $ANT_VER..... [start]"
@@ -42,18 +36,21 @@ else
 	echo "-----> Installing Apache Ant $ANT_VER..... [done ]!"
 fi
 
+# Export JAVA_HOME here
+export JAVA_HOME="/app/.jdk"
+echo "Using JAVA_HOME set to $JAVA_HOME"
 
 if [ ! -f $BUILD_DIR/build.xml ] ; then
 	echo "Failed to build app with Apache Ant"
+	exit 1
 fi
 
-
-# change to build dir to run ant
+# Change to build dir to run ant
 cd ${BUILD_DIR}
 
 export ANT_OPTS="-Xmx512m"
 
-# build app
+# Build app
 BUILDCMD="$ANT_HOME/bin/ant -Duser.home=${BUILD_DIR} clean install"
 echo "-----> executing $BUILDCMD"
 
